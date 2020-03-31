@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Manuale di javabase64 1.3</title>
+</head>
+<body>
+<a name="pIndex" id="pIndex"></a>
+<h1>Manuale di javabase64 1.3</h1>
+<h3>Indice</h3>
+<ol>
+  <li><a href="#1">Requisiti</a></li>
+  <li><a href="#2">Installazione</a></li>
+  <li><a href="#3">Javadoc</a></li>
+  <li><a href="#4">Per cominciare</a></li>
+  <li><a href="#5">Encoding con Base64OutputStream</a></li>
+  <li><a href="#6">Decoding con Base64InputStream</a></li>
+</ol>
+<a name="1"></a>
+<h2>Requisiti</h2>
+<p>Per eseguire ed utilizzare la libreria javabase64 serve un Java Runtime Environment J2SE versione 1.2 o successiva.</p>
+<a name="2"></a>
+<h2>Installazione</h2>
+<p>Il file <em>javabase64-1.3.jar</em> deve essere inserito nel CLASSPATH dell'applicazione.</p>
+<a name="3"></a>
+<h2>Javadoc</h2>
+<p>Ecco i <a href="api/index.html">javadoc di javabase64</a>.</p>
+<a name="4"></a>
+<h2>Per cominciare</h2>
+<p>La libreria javabase64 comprende due stream ed una classe di utilit&agrave;</p>
+<p>La classe di utilit&agrave; <em>it.sauronsoftware.base64.<strong>Base64</strong></em>, nella maggior parte dei casi, dispone di tutto ci&ograve; di cui si ha bisogno per codificare e decodificare dei flussi Base64.</p>
+<p>Per prima cosa bisogna distinguere il caso in cui l'informazione da codificare o decodificare &egrave; di tipo testuale da quando l'informazione &egrave; invece di tipo binario.</p>
+<p>Per codificare una stringa, quindi un'informazione testuale, &egrave; sufficiente chiamare:</p>
+<pre>String encoded = Base64.encode("Ciao, mondo!");</pre>
+<p>Il risultato di questa operazione &egrave; una seconda stringa codificata in Base64, che pu&ograve; successivamente essere decodificata chiamando:</p>
+<pre>String decoded = Base64.decode(encoded);</pre>
+<p>E' possibile forzare l'uso di uno specifico charset durante le operazioni di codifica e decodifica dei testi:</p>
+<pre>String encoded = Base64.encode("Ciao, mondo!", "UTF-8");
+String decoded = Base64.decode(encoded, "UTF-8");</pre>
+<p>Quando si lavora con i dati binari (ad esempio con delle immagini) &egrave; meglio utilizzare le altre forme dei metodi <em>encode()</em> e <em>decode()</em> messe a disposizione dalla classe.</p>
+<p>Se i dati trattati non sono troppi, &egrave; possibile gestirli mantenendoli direttamente in memoria mediante un array di <em>byte</em>:</p>
+<pre>byte[] source = ...; // caricamento dei dati qui
+byte[] encoded = Base64.encode(source);
+byte[] decoded = Base64.decode(encoded);</pre>
+<p>I dati di grossa mole, invece di tenerli in memoria, &egrave; meglio gestirli con gli stream. Il prossimo esempio codifica i contenuti di un file scrivendoli direttamente all'interno di un secondo file, facendo uso di oggetti di tipo <em>java.io.InputStream</em> e <em>java.io.OutputStream</em>:</p> 
+<pre>InputStream inputStream = new FileInputStream("source.jpg");
+OutputStream outputStream = new FileOutputStream("encoded.b64");
+Base64.encode(inputStream, outputStream);
+outputStream.close();
+inputStream.close();</pre>
+<p>In maniera simile, uno stream pu&ograve; essere decodificato:</p>
+<pre>InputStream inputStream = new FileInputStream("encoded.b64");
+OutputStream outputStream = new FileOutputStream("decoded.jpg");
+Base64.decode(inputStream, outputStream);
+outputStream.close();
+inputStream.close();</pre>
+<p>Sono disponibili anche delle facilitazioni per chi lavora con gli oggetti <em>java.io.File</em> di Java. Ecco come codificare direttamente da un file ad un altro:</p>
+<pre>File source = new File("source.jpg");
+File encoded = new File("encoded.b64");
+Base64.encode(source, encoded);</pre>
+<p>Ed ecco come compiere l'operazione inversa:</p>
+<pre>File encoded = new File("encoded.b64");
+File decoded = new File("decoded.jpg");
+Base64.decode(encoded, decoded);</pre>
+<a name="5"></a>
+<h2>Encoding con Base64OutputStream</h2>
+<p>Si pu&ograve; ottenere un controllo pi&ugrave; di dettaglio sulle operazioni di codifica utilizzando la classe <em>it.sauronsoftware.base64.<strong>Base64OutputStream</strong></em>.</p>
+<p><em>Base64OutputStream</em> estende <em>java.io.OutputStream</em> e si comporta proprio come un comune output stream di Java.</p>
+<p>Un <em>Base64OutputStream</em> va creato avvolgendo un altro <em>OutputStream</em> stabilito in precedenza:</p>
+<pre>Base64OutputStream encodingStream = new Base64OutputStream(myOutputStream);</pre>
+<p>Ad esempio si possono mandare i dati codificati direttamente ad un file:</p>
+<pre>Base64OutputStream encodingStream = new Base64OutputStream(new FileOutputStream("encoded.b64"));</pre>
+<p>Una volta che lo stream &egrave; stato aperto &egrave; possibile scrivere dati al suo interno, come si farebbe con qualsiasi altro output stream. L'unica differenza &egrave; che <em>Base64OutputStream</em> filtra i dati ricevuti, scrivendoli sullo stream sottostante dopo averli codificati in Base64.</p>
+<pre>encodingStream.write(bytes);</pre>
+<p>Non si deve dimenticare di chiudere lo stream, una volta che la scrittura &egrave; stata completata. Questa operazione &egrave; necessaria per rilasciare le risorse e terminare correttamente la codifica dei dati.</p>
+<pre>encodingStream.close();</pre>
+<p><em>Base64OutputStream</em>, ogni 76 byte scritti sull'ouput sottostante, inserisce una sequenza di ritorno a capo. Si tratta di una prassi comune quando si codificano dati Base64. Tale comportamento, ad ogni modo, pu&ograve; essere variato, fornendo al costruttore di <em>Base64OutputStream</em> una dimensione di riga differente: 
+<pre>Base64OutputStream encodingStream = new Base64OutputStream(myOutputStream, 48);</pre>
+<p>Un valore pi&ugrave; piccolo di 1 disabilita i ritorni a capo automatici, scrivendo i dati tutti su una unica riga:</p>
+<pre>Base64OutputStream encodingStream = new Base64OutputStream(myOutputStream, 0);</pre>
+<a name="6"></a>
+<h2>Decoding con Base64InputStream</h2>
+<p>Si pu&ograve; ottenere un controllo pi&ugrave; di dettaglio sulle operazioni di decodifica utilizzando la classe <em>it.sauronsoftware.base64.<strong>Base64InputStream</strong></em>.</p>
+<p><em>Base64InputStream</em> estende <em>java.io.InputStream</em> e si comporta proprio come un comune input stream di Java.</p>
+<p>Un <em>Base64InputStream</em> va creato avvolgendo un altro <em>InputStream</em> stabilito in precedenza:</p>
+<pre>Base64InputStream decodingStream = new Base64InputStream(myInputStream);</pre>
+<p>Ad esempio si possono leggere dei dati codificati da un file:</p>
+<pre>Base64InputStream decodingStream = new Base64InputStream(new FileInputStream("encoded.b64"));</pre>
+<p>Una volta che lo stream &egrave; stato aperto &egrave; possibile leggere dati dal suo interno, come si farebbe con qualsiasi altro input stream. L'unica differenza &egrave; che <em>Base64InputStream</em> filtra i dati letti, restituendoli dopo averli decodificati.</p>
+<pre>decodingStream.read(bytes);</pre>
+<p>Non si deve dimenticare di chiudere lo stream, una volta che la lettura &egrave; stata completata.</p>
+<pre>decodingStream.close();</pre>
+</body>
+</html>

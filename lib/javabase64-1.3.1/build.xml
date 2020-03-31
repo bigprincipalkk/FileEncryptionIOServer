@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project name="javabase64" default="rel">
+
+    <condition property="revision" value="${svn.info.rev}" else="UNKNOWN">
+        <isset property="svn.info.rev" />
+    </condition>
+    <condition property="version" value="${svn.tag}" else="rv${revision}">
+        <isset property="svn.tag" />
+    </condition>
+    <condition property="target.zip.dir" value="${target.dir}" else="${basedir}">
+        <isset property="target.dir" />
+    </condition>
+    <property file="${basedir}/build.properties" />    
+
+	<target name="bin">
+		<delete dir="${javabase64.dirs.bin}" />
+		<mkdir dir="${javabase64.dirs.bin}" />
+		<javac srcdir="${javabase64.dirs.src}" destdir="${javabase64.dirs.bin}" source="1.2" target="1.2" />
+        <copy todir="${javabase64.dirs.bin}">
+            <fileset dir="${javabase64.dirs.src}">
+                <exclude name="**/*.java" />
+                <exclude name="**/package.html" />
+            </fileset>
+        </copy>
+	</target>
+
+	<target name="jar" depends="bin">
+		<jar destfile="${javabase64.files.jar}" basedir="${javabase64.dirs.bin}" compress="true" />
+	</target>
+
+	<target name="doc">
+		<delete dir="${javabase64.dirs.api}" />
+		<mkdir dir="${javabase64.dirs.api}" />
+		<javadoc sourcepath="${javabase64.dirs.src}" destdir="${javabase64.dirs.api}" doctitle="Java Base64 ${version}" linksource="yes" source="1.2" access="protected" author="true" version="true" verbose="true">
+			<package name="it.sauronsoftware.base64.*" />
+		</javadoc>
+	</target>
+
+	<target name="rel" depends="bin,jar,doc">
+		<delete dir="${javabase64.dirs.tmp}" />
+		<mkdir dir="${javabase64.dirs.tmp}" />
+		<property name="javabase64.dirs.rel" value="${javabase64.dirs.tmp}/javabase64-${version}" />
+		<mkdir dir="${javabase64.dirs.rel}" />
+		<copy todir="${javabase64.dirs.rel}" verbose="true">
+			<fileset dir="${basedir}" includes="examples/**" />
+			<fileset dir="${basedir}" includes="LICENSE.txt" />
+			<fileset dir="${basedir}" includes="README.txt" />
+			<fileset dir="${basedir}" includes="CHANGELOG.txt" />
+			<fileset dir="${basedir}" includes="BUILD.txt" />
+			<fileset dir="${basedir}" includes="build.properties" />
+			<fileset dir="${basedir}" includes="build.xml" />
+			<fileset file="${javabase64.files.jar}" />
+		</copy>
+		<mkdir dir="${javabase64.dirs.rel}/src" />
+		<copy todir="${javabase64.dirs.rel}/src" verbose="true">
+			<fileset dir="${javabase64.dirs.src}" />
+		</copy>
+		<mkdir dir="${javabase64.dirs.rel}/doc" />
+		<copy todir="${javabase64.dirs.rel}/doc" verbose="true">
+			<fileset dir="${javabase64.dirs.doc}" />
+		</copy>
+		<zip destfile="${javabase64.files.rel}" basedir="${javabase64.dirs.tmp}" includes="javabase64-${version}/**" />
+		<delete dir="${javabase64.dirs.tmp}" />
+	</target>
+
+</project>

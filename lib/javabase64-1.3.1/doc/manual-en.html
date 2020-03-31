@@ -1,0 +1,95 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>javabase64 1.3 manual</title>
+</head>
+<body>
+<a name="pIndex" id="pIndex"></a>
+<h1>javabase64 1.3 manual</h1>
+<h3>Index</h3>
+<ol>
+  <li><a href="#1">Requirements</a></li>
+  <li><a href="#2">Installation</a></li>
+  <li><a href="#3">Javadocs</a></li>
+  <li><a href="#4">Quickstart</a></li>
+  <li><a href="#5">Encoding with Base64OutputStream</a></li>
+  <li><a href="#6">Decoding with Base64InputStream</a></li>
+</ol>
+<a name="1"></a>
+<h2>Requirements</h2>
+<p>To run the javabase64 library you need a Java Runtime Environment J2SE v. 1.2 or later.</p>
+<a name="2"></a>
+<h2>Installation</h2>
+<p>Add the <em>javabase64-1.3.jar</em> file to your application classpath, and you'll be
+  automatically enabled to the use of the javabase64 classes.</p>
+<a name="3"></a>
+<h2>Javadocs</h2>
+<p>Here come the <a href="api/index.html">javabase64 javadocs</a>.</p>
+<a name="4"></a>
+<h2>Quickstart</h2>
+<p>The javabase64 library consists of two streams and a utility class.</p>
+<p>The <em>it.sauronsoftware.base64.<strong>Base64</strong></em> utility class is, in most of cases, has everything you need to encode and decode.</p>
+<p>First of all, you should tell apart if you have to encode/decode a string or a binary stream.</p>
+<p>If you want to encode a string, you can easily call:</p>
+<pre>String encoded = Base64.encode("Hello, world!");</pre>
+<p>The result of this operation is a Base64 encoded string, that you can decode back later by calling:</p>
+<pre>String decoded = Base64.decode(encoded);</pre>
+<p>You can force the use of a specific charset during strings encoding and decoding operations:</p>
+<pre>String encoded = Base64.encode("Hello, world!", "UTF-8");
+String decoded = Base64.decode(encoded, "UTF-8");</pre>
+<p>If you are working with binary data (i.e. images) you can use other forms of the <em>encode()</em> and <em>decode()</em> methods.</p>
+<p>If data are not large and you handle them directly in memory, using a byte array:</p>
+<pre>byte[] source = ...; // load your data here
+byte[] encoded = Base64.encode(source);
+byte[] decoded = Base64.decode(encoded);</pre>
+<p>Larger data are better handled with streams. The next sample code encodes a file to another, using <em>java.io.InputStream</em> and <em>java.io.OutputStream</em> objects:</p>
+<pre>InputStream inputStream = new FileInputStream("source.jpg");
+OutputStream outputStream = new FileOutputStream("encoded.b64");
+Base64.encode(inputStream, outputStream);
+outputStream.close();
+inputStream.close();</pre>
+<p>In similar manner, a stream can be decoded:</p>
+<pre>InputStream inputStream = new FileInputStream("encoded.b64");
+OutputStream outputStream = new FileOutputStream("decoded.jpg");
+Base64.decode(inputStream, outputStream);
+outputStream.close();
+inputStream.close();</pre>
+<p>Shortcuts for <em>java.io.File</em> objects are provided. Encoding from a file to another:</p>
+<pre>File source = new File("source.jpg");
+File encoded = new File("encoded.b64");
+Base64.encode(source, encoded);</pre>
+<p>Decoding from a file to another:</p>
+<pre>File encoded = new File("encoded.b64");
+File decoded = new File("decoded.jpg");
+Base64.decode(encoded, decoded);</pre>
+<a name="5"></a>
+<h2>Encoding with Base64OutputStream</h2>
+<p>You can gain more control on the encoding process by avoiding the use of the static utilities in the <em>Base64</em> class and by using directly a <em>it.sauronsoftware.base64.<strong>Base64OutputStream</strong></em> instance.</p>
+<p>The <em>Base64OutputStream</em> extends <em>java.io.OutputStream</em> and works as many other well know Java streams.</p>
+<p>You can create a <em>Base64OutputStream</em> by wrapping another existing <em>OutputStream</em>:</p>
+<pre>Base64OutputStream encodingStream = new Base64OutputStream(myOutputStream);</pre>
+<p>I.e. you can send encoded data directly to a file by calling:</p>
+<pre>Base64OutputStream encodingStream = new Base64OutputStream(new FileOutputStream("encoded.b64"));</pre>
+<p>Now you can write your bytes in the stream as you would do with a common output stream. Data will be automatically encoded by the <em>Base64OutputStream</em> class.</p>
+<pre>encodingStream.write(bytes);</pre>
+<p>Don't forget to close the stream when the writing operation is completed. This is necessary to finalize the encoded data line.</p>
+<pre>encodingStream.close();</pre>
+<p>By default, <em>Base64OutputStream</em> wraps to a new line every 76 bytes sent to the underlying output stream. This behavior can be changed by supplying an alternative <em>wrapAt</em> value to the <em>Base64OutputStream</em> constructor:</p>
+<pre>Base64OutputStream encodingStream = new Base64OutputStream(myOutputStream, 48);</pre>
+<p>A value less than 1 disables wrapping:</p>
+<pre>Base64OutputStream encodingStream = new Base64OutputStream(myOutputStream, 0);</pre>
+<a name="6"></a>
+<h2>Decoding with Base64InputStream</h2>
+<p>You can gain more control on the decoding process by using a <em>it.sauronsoftware.base64.<strong>Base64InputStream</strong></em> instance.</p>
+<p>The <em>Base64InputStream</em> extends <em>java.io.InputStream</em> and works as many other well know Java streams.</p>
+<p>You can create a <em>Base64InputStream</em> by wrapping another existing <em>InputStream</em>:</p>
+<pre>Base64InputStream decodingStream = new Base64InputStream(myInputStream);</pre>
+<p>I.e. you can read decoded data directly from an encoded file by calling:</p>
+<pre>Base64InputStream decodingStream = new Base64InputStream(new FileInputStream("encoded.b64"));</pre>
+<p>Now you can read your bytes from the stream as you would do with a common input stream. Data will be automatically decoded by the <em>Base64InputStream</em> class.</p>
+<pre>decodingStream.read(bytes);</pre>
+<p>Don't forget to close the stream when the reading operation is completed.</p>
+<pre>decodingStream.close();</pre>
+</body>
+</html>
